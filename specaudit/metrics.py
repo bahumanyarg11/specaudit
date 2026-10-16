@@ -20,7 +20,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-CATEGORIES = ("ok", "both_nonfinite", "spurious_nan", "spurious_inf", "missing_nonfinite", "sign_error")
+CATEGORIES = ("ok", "both_nonfinite", "spurious_nan", "spurious_inf", "missing_nonfinite", "sign_error", "underflow")
 
 
 def ulp_error(got: np.ndarray, ref_hi: np.ndarray, ref_lo: np.ndarray, dtype=np.float64) -> np.ndarray:
@@ -67,6 +67,9 @@ def classify(got: np.ndarray, ref_hi: np.ndarray) -> np.ndarray:
     cat[gf & ~rf] = "missing_nonfinite"
     sign = gf & rf & (got != 0) & (ref_hi != 0) & (np.sign(got) != np.sign(ref_hi))
     cat[sign] = "sign_error"
+    # result flushed to zero where the reference is a (sub)normal nonzero value
+    tiny = np.finfo(np.float64).tiny
+    cat[gf & rf & (got == 0) & (ref_hi != 0) & (np.abs(ref_hi) < tiny)] = "underflow"
     return cat
 
 
@@ -83,6 +86,7 @@ class Summary:
     n_spurious_inf: int
     n_missing_nonfinite: int
     n_sign_error: int
+    n_underflow: int
     worst_index: int
 
     def to_dict(self) -> dict:
@@ -111,5 +115,6 @@ def summarise(ulp: np.ndarray, cat: np.ndarray) -> Summary:
         n_spurious_inf=int((cat == "spurious_inf").sum()),
         n_missing_nonfinite=int((cat == "missing_nonfinite").sum()),
         n_sign_error=int((cat == "sign_error").sum()),
+        n_underflow=int((cat == "underflow").sum()),
         worst_index=worst_local,
     )

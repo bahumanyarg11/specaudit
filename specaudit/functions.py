@@ -272,7 +272,13 @@ def sample_domain(domain: Domain, n: int, rng: np.random.Generator) -> np.ndarra
         for f in domain.focus:
             offs = 10 ** rng.uniform(-14, -1, per) * rng.choice([-1.0, 1.0], size=per) * max(abs(f), 1.0)
             parts.append(f + offs)
-    x = np.concatenate(parts)[:n]
+    x = np.concatenate(parts)
+    if x.size < n:  # rounding in the focus split: top up with log-uniform points
+        extra = 10 ** rng.uniform(np.log10(domain.lo), np.log10(domain.hi), n - x.size)
+        if domain.negative:
+            extra = extra * rng.choice([-1.0, 1.0], size=extra.size)
+        x = np.concatenate([x, extra])
+    x = x[:n]
     lo_abs = min(domain.lo, 1e-300)
     if not domain.negative:
         x = np.abs(x)

@@ -52,7 +52,7 @@ def build_report(results_path: str | Path, out_path: str | Path) -> str:
         "Error is in units in the last place (ULP) of the reference value rounded to the result dtype; the reference is "
         "mpmath at 30 digits. A correctly rounded result is ≤ 0.5 ULP. Cells: max ULP / 99th percentile ULP / % of "
         "samples worse than 4 ULP, then anomalies: `nan` = NaN where the reference is finite, `inf` = overflow where the "
-        "reference is finite, `sgn` = wrong sign, `fin` = finite where the reference is ±inf/NaN.",
+        "reference is finite, `sgn` = wrong sign, `fin` = finite where the reference is ±inf/NaN, `uf0` = returned 0 where the reference is a subnormal.",
         "",
         "✅ max ≤ 2 ULP and no anomalies · ⚠️ max ≤ 1000 ULP, < 1 % of samples > 4 ULP, ≤ 2 anomalies · ❌ otherwise · 💥 raised",
         "",
@@ -82,6 +82,8 @@ def build_report(results_path: str | Path, out_path: str | Path) -> str:
                     anom.append(f"sgn {s['n_sign_error']}")
                 if s["n_missing_nonfinite"]:
                     anom.append(f"fin {s['n_missing_nonfinite']}")
+                if s.get("n_underflow"):
+                    anom.append(f"uf0 {s['n_underflow']}")
                 cells.append(
                     f"{_grade(s)} {_fmt(s['max_ulp'])} / {_fmt(s['p99_ulp'])} / {100 * s['frac_gt_4ulp']:.1f}%"
                     + (" · " + ", ".join(anom) if anom else "")

@@ -98,10 +98,18 @@ def _ndtri(p):
         return -mp.inf
     if p == 1:
         return mp.inf
-    return mp.sqrt(2) * mp.erfinv(2 * p - 1)
+    # erfinv(2p-1) loses all precision for tiny p; solve ncdf(x) = p (or the mirrored problem) instead.
+    mirrored = p > mp.mpf("0.5")
+    q = 1 - p if mirrored else p
+    x0 = -mp.sqrt(2 * mp.log(1 / q)) if q < mp.mpf("0.1") else mp.sqrt(2) * mp.erfinv(2 * q - 1)
+    root = mp.findroot(lambda x: mp.ncdf(x) - q, x0, tol=mp.mpf(10) ** (-DPS + 2))
+    return -root if mirrored else root
 
 
 def _log_ndtr(x):
+    # for x > 0, ncdf(x) = 1 - tiny rounds to 1: use log1p(-ncdf(-x)) instead
+    if x > 0:
+        return mp.log1p(-mp.ncdf(-x))
     return mp.log(mp.ncdf(x))
 
 

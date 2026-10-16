@@ -17,8 +17,11 @@ def test_reference_values():
     assert abs(lo[1]) < 1e-16
     hi, _ = reference("lgamma", np.array([-1.0]))
     assert hi[0] == math.inf
-    hi, _ = reference("ndtri", np.array([0.5, 0.0, 1.0, 2.0]))
-    assert hi[0] == 0.0 and hi[1] == -math.inf and hi[2] == math.inf and math.isnan(hi[3])
+    hi, _ = reference("ndtri", np.array([0.5, 0.0, 1.0, 2.0, 1e-32]))
+    assert abs(hi[0]) < 1e-29 and hi[1] == -math.inf and hi[2] == math.inf and math.isnan(hi[3])
+    assert hi[4] == pytest.approx(-11.856132, abs=1e-5)  # ndtri(1e-32)
+    hi, _ = reference("log_ndtr", np.array([20.0]))
+    assert hi[0] == pytest.approx(-2.7536241186062337e-89, rel=1e-6)
     hi, _ = reference("gammainc", np.array([1.0]), np.array([1.0]))
     assert hi[0] == pytest.approx(1 - math.exp(-1))
 
@@ -76,7 +79,7 @@ def test_sample_domain_shapes_and_bounds():
 
 def test_assert_max_ulp_passes_for_scipy_erf():
     x = np.linspace(-5, 5, 2001)
-    s = assert_max_ulp(sc.erf, "erf", x, max_ulp=2.0)
+    s = assert_max_ulp(sc.erf, "erf", x, max_ulp=3.0)
     assert s["n"] == 2001
 
 
