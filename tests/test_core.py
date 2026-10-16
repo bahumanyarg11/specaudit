@@ -100,3 +100,18 @@ def test_small_audit_runs(tmp_path):
 
     text = build_report(tmp_path / "results.json", tmp_path / "ATLAS.md")
     assert "`erf`" in text
+
+
+def test_zeta_reference_keeps_relative_accuracy_for_tiny_values():
+    # mpmath.zeta(43.013, 305.42) at 30 digits is only ~1e-9 accurate (absolute E-M tolerance);
+    # the direct sum and SciPy/JAX/PyTorch agree on 1.0181311132601285e-106 (float64 inputs).
+    hi, lo = REFERENCES["zeta"](43.01303985093054, 305.4243263250737)
+    assert abs(hi - 1.0181311132601285e-106) / 1.0181311132601285e-106 < 3e-16
+
+
+def test_betaln_reference_handles_huge_argument_ratios():
+    # at 30 digits a + b == b for b/a > 1e30 and mp.beta returned Gamma(a): +4.0e42 instead of -1.248e43
+    hi, lo = REFERENCES["betaln"](4.329415142252114e40, 2.5198543297732718e165)
+    assert abs(hi - (-1.2480920458554066e43)) / 1.2480920458554066e43 < 1e-15
+    hi, lo = REFERENCES["betaln"](3.660038090358462e260, 0.006290321899976063)
+    assert abs(hi - 1.2911427050257500575) < 1e-14

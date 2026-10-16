@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import platform
 import time
+import zlib
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
@@ -80,7 +81,6 @@ def run_audit(
     functions = functions or list(FUNCTIONS)
     libraries = libraries or list(LIBRARIES)
     libs = {name: load_library(name) for name in libraries}
-    rng = np.random.default_rng(seed)
     results: list[CaseResult] = []
     done: set[str] = set()
     if resume and out_dir is not None and (Path(out_dir) / "results.json").exists():
@@ -91,6 +91,8 @@ def run_audit(
         if fname in done:
             continue
         spec = FUNCTIONS[fname]
+        # seed per function (not one stream across functions) so a partial re-run reproduces the samples
+        rng = np.random.default_rng([seed, zlib.crc32(fname.encode())])
         args = [sample_domain(d, n, rng) for d in spec.domains]
         t0 = time.perf_counter()
         ref_hi, ref_lo = reference(spec.name, *args)

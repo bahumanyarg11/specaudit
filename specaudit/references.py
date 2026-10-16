@@ -169,9 +169,31 @@ def _betainc(a, b, x):
 
 
 def _hurwitz_zeta(s, q):
+    """Hurwitz zeta by Euler-Maclaurin with a *relative* stopping rule.
+
+    mpmath's ``zeta(s, q)`` stops its Euler-Maclaurin tail on an absolute 2**-prec tolerance, so when
+    the value is tiny (s = 43, q = 305 gives 1e-106) it is only accurate to ~1e-9 relative at 30
+    digits (verified 2026-10-16: direct summation and mp.zeta at 150 digits agree with SciPy/JAX/
+    PyTorch to 16 digits, mp.zeta at 30 digits does not). This version is validated to 1e-37
+    relative against mp.zeta run at 30 + |log10 value| + 30 digits over the audited domain.
+    """
     if s <= 1 or q <= 0:
         return mp.nan
-    return mp.zeta(s, q)
+    n = int(max(20, mp.ceil(s / 2))) + 10  # direct terms until q+n >~ s/2 so the tail converges
+    total = mp.fsum((q + k) ** (-s) for k in range(n))
+    w = q + n
+    total += w ** (1 - s) / (s - 1) + w ** (-s) / 2
+    coef = mp.mpf(1)  # s (s+1) ... (s+2j-2)
+    wpow = w ** (-s - 1)
+    tol = mp.mpf(10) ** (-(mp.mp.dps - 5))
+    for j in range(1, 200):
+        coef *= s if j == 1 else (s + 2 * j - 3) * (s + 2 * j - 2)
+        term = mp.bernoulli(2 * j) / mp.factorial(2 * j) * coef * wpow
+        total += term
+        if abs(term) < tol * abs(total):
+            return total
+        wpow /= w * w
+    return mp.nan
 
 
 def _spence(z):
@@ -222,9 +244,18 @@ def _beta(a, b):
 
 
 def _betaln(a, b):
+    """log|B(a, b)| = lgamma(a) + lgamma(b) - lgamma(a+b), at a precision where a + b is exact.
+
+    At 30 digits ``a + b == b`` whenever b/a > 1e30, and mp.beta then silently returns Gamma(a)
+    (e.g. betaln(4.3e40, 2.5e165) came out +4.0e42 instead of -1.25e43). The first atlas's betaln
+    'sign errors' were this reference bug, not the libraries.
+    """
     if a <= 0 or b <= 0:
         return mp.nan
-    return mp.log(abs(mp.beta(a, b)))
+    extra = int(mp.log10(max(a, b) / min(a, b))) + 10
+    with mp.workdps(mp.mp.dps + extra):
+        a, b = +a, +b
+        return mp.loggamma(a) + mp.loggamma(b) - mp.loggamma(a + b)
 
 
 def _log1p(x):

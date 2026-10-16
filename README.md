@@ -3,7 +3,7 @@
 **How accurate are the special functions you call?**
 
 specaudit evaluates `scipy.special`, `jax.scipy.special`, `torch.special` and NumPy against mpmath
-references carried to 30 significant digits and reports the error in **units in the last place
+references carried to 30 significant digits (worst cases re-verified at 50) and reports the error in **units in the last place
 (ULP)**, per function, per library, per dtype, over wide parameter ranges including tails, poles and
 inverse-function end points. The result is an accuracy atlas you can read, and an assertion you can
 put in your own test suite.
@@ -36,30 +36,53 @@ and underflow to 0 where the reference is a subnormal.
 <!-- HEADLINES -->
 ### Headline findings (float64, 500 samples per function, this machine; see ATLAS.md for every cell)
 
-Library-side, not explained by zeros or tails:
+Every item below was re-checked by hand against mpmath at 50 digits on the exact worst inputs stored in
+`results_f64/results.json` (2026-10-16); issue drafts with reproducers are in [docs/outreach](docs/outreach/).
 
-- **PyTorch Bessel functions `bessel_j0/j1/y0/y1`** have *absolute* errors up to ~4e-7 near their zeros and
-  return the wrong sign in 11–21 of 500 samples (e.g. `bessel_y1(5.4296810407942)` = −4.2e-7, true −2.8e-14).
-  SciPy's absolute error at the same points is ~4e-17.
-- **`torch.special.ndtr`** returns exactly 0 at x ≈ −9.95 where the true value is 1.3e-23; SciPy and JAX are
-  correct down to the subnormal range (x ≈ −38).
-- **`jax.scipy.special.gamma`**: 84 % of samples are more than 4 ULP off (99th percentile ≈ 1400 ULP);
-  SciPy's `gamma` stays within 3 ULP on the same inputs.
-- **`erfinv` in JAX and PyTorch** lose accuracy as |x| → 1 (99th percentile 7.5e3 and 2.1e4 ULP; SciPy: 1.6 ULP max).
-- **`jax.scipy.special.exp1` and `expi` (float64) did not return** within 15 minutes on 500 inputs spanning
-  1e-300…700 and were skipped; everything else in this atlas ran in milliseconds.
-- `jax.scipy.special.betainc`: 57 % of samples > 4 ULP (p99 ≈ 940 ULP) against SciPy's 14 % / 73 ULP;
-  `jax.scipy.special.log_ndtr` p99 ≈ 9e5 ULP against ~700 for SciPy and PyTorch.
-- `i0`/`i1` overflow to +inf for 700 < x < 709.7 in all three libraries although the true value is still finite.
+Library-side, confirmed:
+
+- **PyTorch `bessel_j0/j1/y0/y1` and `airy_ai`** are wrong by up to 8.7e-7 *absolute* just above the
+  internal branch point x = 5 (airy: x < −2.09), e.g. `bessel_j0(7.0)` = 0.3000792697 for 0.3000792705,
+  and only reach 1e-15 for x ≳ 20; near the zeros this shows as wrong signs (11–21 of 500 samples).
+  Cause: the Cephes `p1evl` denominators are evaluated without their implied leading 1 (reproduced
+  bit-for-bit). Already reported: pytorch/pytorch#198583.
+- **`torch.special.ndtr`** is `0.5·(1 + erf(x/√2))`: relative error 2.3e-6 at x = −7, 2 % at −8, and exactly 0 for
+  every x ≤ −8.3744 (true value 2.8e-17 there; SciPy and JAX are correct down to x ≈ −38). Already reported:
+  pytorch/pytorch#192295.
+- **`torch.special.erfinv`** (float64, eager, this macOS/arm64 build) degrades towards ±1: 2e-12 absolute at
+  1 − 2⁻²⁰, 8e-9 at 1 − 2⁻³⁰, 3.5e-4 at 1 − 2⁻⁵² (3.9e11 ULP). The two Newton steps on `erf(x) − y` cannot see the
+  residual near 1. SciPy: ≤ 2 ULP everywhere.
+- **`jax.scipy.special.log_ndtr`** computes `log(ndtr(x))` for 0 < x ≤ 8 and loses up to 7.7 % relative
+  accuracy (x ≈ 7.98); in float32 the same happens for 2 < x ≤ 5 (9 % at x = 4.97). `log1p(-ndtr(-x))`, as
+  SciPy and PyTorch do, is within 48 ULP.
+- **`jax.scipy.special.gamma`** is `exp(lgamma(x))`, so it carries |ln Γ|·ε relative error: 104 ULP at x = 20
+  (19! is exactly representable; SciPy returns it exactly), 2 564 ULP near 171.6; 84 % of samples > 4 ULP.
+- **`jax.scipy.special.erfinv`** loses accuracy for 1 − |x| between 1e-12 and 1e-6 (up to 5e5 ULP, 4.4e-10
+  absolute); **`betainc`** has p99 ≈ 940 ULP against SciPy's 73, and its result for a given input changes
+  with the other elements of the array (69 ULP alone, 3 963 ULP inside the 500-sample batch).
+- **`jax.scipy.special.exp1`/`expi`** (float64) hang on any array holding one element ≲ 1e-6 next to another
+  (`exp1(jnp.array([1e-20, 2.0]))` never returns; every scalar returns in < 0.5 s). Reported as jax-ml/jax#13543
+  and fixed after 0.11.2 by jax-ml/jax#41253; both functions are skipped for JAX in this atlas.
+- **`scipy.special.betaln`** returns NaN for 259 of 500 samples over (1e-3, 1e300)², e.g. betaln(1.1e142, 1.7e115)
+  (true −1.04e117; JAX returns it), and is off by up to 9e6 ULP (2e-9 relative) for large unequal arguments
+  such as betaln(2.2e123, 3.0e117).
+- `scipy.special.beta` goes through `exp(lgamma(a)+lgamma(b)−lgamma(a+b))` once a + b > 171.6 and loses
+  up to 1 540 ULP (a = 131.3, b = 110.1); p99 ≈ 390 ULP.
+- `i0`/`i1` overflow to +inf for 709.78 < x < 713.99 in SciPy, JAX and PyTorch (all Cephes-derived:
+  `exp(x)` overflows before `exp(x)/√(2πx)` does); the true value is finite up to x ≈ 713.987.
 
 Shared by all libraries and expected: relative-accuracy loss within ~1e-13 of a function's zeros
 (`lgamma` at 1 and 2, `digamma` at 1.4616, `sinc` at integers, `logit` at 0.5, `expi` at 0.3725, SciPy's
-Bessel zeros); 100–350 ULP in the far tails of `erfc`, `erfcx`, `ndtr`, `gammainc` where SciPy, JAX and PyTorch
-share Cephes-derived code.
+Bessel zeros); 100–1 000 ULP in the far tails of `erfc`, `erfcx`, `ndtr`, `log_ndtr`, `gammainc` where SciPy, JAX and
+PyTorch share Cephes-derived code.
 
-Not yet verified by hand (the reference may be at fault, treat as open questions): identical ~9e6 ULP
-deviations of all three libraries for Hurwitz `zeta` at s ≳ 40; SciPy `betaln` NaN at huge arguments;
-SciPy `beta` p99 ≈ 390 ULP; PyTorch `airy_ai`.
+Reference-side (fixed in this release, the libraries were right): the first atlas showed identical ~9e6 ULP
+deviations of all three libraries for Hurwitz `zeta` at s ≳ 40 and "sign errors" for `betaln` at huge arguments.
+Both were mpmath/reference problems: `mpmath.zeta(s, q)` stops its Euler–Maclaurin tail on an *absolute*
+tolerance and is only ~1e-9 accurate when the value is ~1e-106 (draft: [docs/outreach/mpmath-hurwitz-zeta.md](docs/outreach/mpmath-hurwitz-zeta.md));
+and `mp.beta(a, b)` at 30 digits silently computes `a + b == b` when b/a > 1e30. `references.py` now uses its
+own relative-tolerance Euler–Maclaurin for zeta and the `lgamma` form at scaled precision for betaln; after
+re-running, `zeta` is ≤ 3.3 ULP in all three libraries.
 <!-- /HEADLINES -->
 
 ## How the error is measured
