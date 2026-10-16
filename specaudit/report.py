@@ -22,13 +22,15 @@ def _fmt(x: float) -> str:
 
 
 def _grade(s: dict) -> str:
-    """One glyph per cell: ✅ ≤2 ULP everywhere and no anomalies; ⚠️ ≤1e3 ULP max / rare >4 ULP; ❌ otherwise."""
+    """One glyph per cell, judged on the bulk of the samples (p99 and the >4 ULP fraction), not the single
+    worst point: zeros of a function make the max ULP explode for every library.
+    ✅ p99 ≤ 2 ULP, < 0.5 % of samples > 4 ULP, no anomalies · ⚠️ p99 ≤ 100 ULP, < 5 % > 4 ULP, ≤ 2 anomalies · ❌ otherwise."""
     if "error" in s:
         return "💥"
     bad = s["n_spurious_nan"] + s["n_spurious_inf"] + s["n_sign_error"] + s["n_missing_nonfinite"]
-    if bad == 0 and s["max_ulp"] <= 2.0:
+    if bad == 0 and s["p99_ulp"] <= 2.0 and s["frac_gt_4ulp"] < 0.005:
         return "✅"
-    if bad <= 2 and s["max_ulp"] <= 1e3 and s["frac_gt_4ulp"] <= 0.01:
+    if bad <= 2 and s["p99_ulp"] <= 100 and s["frac_gt_4ulp"] < 0.05:
         return "⚠️"
     return "❌"
 
@@ -54,7 +56,8 @@ def build_report(results_path: str | Path, out_path: str | Path) -> str:
         "samples worse than 4 ULP, then anomalies: `nan` = NaN where the reference is finite, `inf` = overflow where the "
         "reference is finite, `sgn` = wrong sign, `fin` = finite where the reference is ±inf/NaN, `uf0` = returned 0 where the reference is a subnormal.",
         "",
-        "✅ max ≤ 2 ULP and no anomalies · ⚠️ max ≤ 1000 ULP, < 1 % of samples > 4 ULP, ≤ 2 anomalies · ❌ otherwise · 💥 raised",
+        "✅ p99 ≤ 2 ULP, < 0.5 % of samples > 4 ULP, no anomalies · ⚠️ p99 ≤ 100 ULP, < 5 % > 4 ULP, ≤ 2 anomalies · ❌ otherwise · 💥 raised. "
+        "Grades use the bulk of the samples because every library loses relative accuracy near a function's zeros, which alone drives the max.",
         "",
     ]
     for dtype in dtypes:

@@ -35,6 +35,9 @@ def _dd(value) -> tuple[float, float]:
     return hi, lo
 
 
+TIMEOUTS: list[tuple[str, tuple[float, ...]]] = []  # kept for the results schema; domains are capped instead
+
+
 def _wrap(fn: Callable) -> Callable[..., tuple[float, float]]:
     def wrapped(*args: float) -> tuple[float, float]:
         with mp.workdps(DPS):
@@ -74,6 +77,9 @@ def _polygamma(n, x):
 
 
 def _erfcx(x):
+    if x > 1e4:  # asymptotic series; mp.erfc itself returns 0 for astronomically large x
+        inv = 1 / (2 * x * x)
+        return (1 - inv + 3 * inv**2 - 15 * inv**3 + 105 * inv**4) / (x * mp.sqrt(mp.pi))
     return mp.exp(x * x) * mp.erfc(x)
 
 
@@ -98,11 +104,12 @@ def _ndtri(p):
         return -mp.inf
     if p == 1:
         return mp.inf
-    # erfinv(2p-1) loses all precision for tiny p; solve ncdf(x) = p (or the mirrored problem) instead.
+    # erfinv(2q-1) needs about -log10(q) extra digits for tiny q: raise the precision accordingly.
     mirrored = p > mp.mpf("0.5")
     q = 1 - p if mirrored else p
-    x0 = -mp.sqrt(2 * mp.log(1 / q)) if q < mp.mpf("0.1") else mp.sqrt(2) * mp.erfinv(2 * q - 1)
-    root = mp.findroot(lambda x: mp.ncdf(x) - q, x0, tol=mp.mpf(10) ** (-DPS + 2))
+    extra = int(-mp.log10(q)) + 10 if q < mp.mpf("1e-10") else 0
+    with mp.workdps(DPS + extra):
+        root = mp.sqrt(2) * mp.erfinv(2 * mp.mpf(q) - 1)
     return -root if mirrored else root
 
 

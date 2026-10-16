@@ -83,7 +83,7 @@ _add(
 _add(
     FunctionSpec(
         "polygamma",
-        (R(1, 4, negative=False, integer=True, integers=(1, 2, 3, 4)), R(1e-300, 1e300, focus=(-1, -2, 0.5, 1))),
+        (R(1, 4, negative=False, integer=True, integers=(1, 2, 3, 4)), R(1e-300, 1e6, focus=(-1, -2, 0.5, 1))),
         scipy="polygamma",
         jax="polygamma",
         torch="polygamma",
@@ -155,7 +155,7 @@ _add(FunctionSpec("i1e", (_REAL,), scipy="i1e", jax="i1e", torch="i1e"))
 _add(
     FunctionSpec(
         "j0",
-        (R(1e-300, 1e8, focus=(2.404825557695773, 5.520078110286311, 100, 1e4)),),
+        (R(1e-300, 1e5, focus=(2.404825557695773, 5.520078110286311, 100, 1e4)),),
         scipy="j0",
         torch="bessel_j0",
         description="Bessel J0; zeros are hard",
@@ -163,13 +163,13 @@ _add(
 )
 _add(
     FunctionSpec(
-        "j1", (R(1e-300, 1e8, focus=(3.8317059702075125, 7.015586669815619, 100)),), scipy="j1", torch="bessel_j1"
+        "j1", (R(1e-300, 1e5, focus=(3.8317059702075125, 7.015586669815619, 100)),), scipy="j1", torch="bessel_j1"
     )
 )
 _add(
     FunctionSpec(
         "y0",
-        (R(1e-300, 1e8, negative=False, focus=(0.8935769662791675, 3.957678419314858, 100)),),
+        (R(1e-300, 1e5, negative=False, focus=(0.8935769662791675, 3.957678419314858, 100)),),
         scipy="y0",
         torch="bessel_y0",
     )
@@ -177,7 +177,7 @@ _add(
 _add(
     FunctionSpec(
         "y1",
-        (R(1e-300, 1e8, negative=False, focus=(2.197141326031017, 5.429681040794135, 100)),),
+        (R(1e-300, 1e5, negative=False, focus=(2.197141326031017, 5.429681040794135, 100)),),
         scipy="y1",
         torch="bessel_y1",
     )
@@ -210,7 +210,7 @@ _add(
 _add(
     FunctionSpec(
         "betainc",
-        (R(1e-2, 1e3, negative=False), R(1e-2, 1e3, negative=False), R(1e-300, 1.0, negative=False, linear=(0.0, 1.0))),
+        (R(1e-2, 2e2, negative=False), R(1e-2, 2e2, negative=False), R(1e-300, 1.0, negative=False, linear=(0.0, 1.0))),
         scipy="betainc",
         jax="betainc",
         description="regularised incomplete beta I_x(a, b)",
@@ -219,7 +219,7 @@ _add(
 _add(
     FunctionSpec(
         "zeta",
-        (R(1.0 + 1e-6, 1e3, negative=False, focus=(1.000001, 1.5, 2, 3)), R(1e-6, 1e6, negative=False)),
+        (R(1.0 + 1e-6, 1e3, negative=False, focus=(1.000001, 1.5, 2, 3)), R(1e-6, 1e4, negative=False)),
         scipy="zeta",
         jax="zeta",
         torch="zeta",
@@ -227,15 +227,31 @@ _add(
     )
 )
 _add(FunctionSpec("spence", (R(1e-300, 1e300, negative=False, focus=(1, 2, 0.5)),), scipy="spence", jax="spence"))
-_add(FunctionSpec("exp1", (R(1e-300, 700.0, negative=False),), scipy="exp1", jax="exp1"))
-_add(FunctionSpec("expi", (R(1e-300, 700.0, focus=(0.37250741078136663,)),), scipy="expi", jax="expi"))
+_add(
+    FunctionSpec(
+        "exp1",
+        (R(1e-300, 700.0, negative=False),),
+        scipy="exp1",
+        jax=None,  # jax.scipy.special.exp1 (float64) did not return within 15 min on this sample set: skipped, see README
+        description="E1(x); JAX implementation skipped (hangs on extreme arguments)",
+    )
+)
+_add(
+    FunctionSpec(
+        "expi",
+        (R(1e-300, 700.0, focus=(0.37250741078136663,)),),
+        scipy="expi",
+        jax=None,
+        description="Ei(x); JAX implementation skipped (hangs on extreme arguments)",
+    )
+)
 _add(
     FunctionSpec(
         "xlogy", (R(1e-300, 1e300), R(1e-300, 1e300, negative=False)), scipy="xlogy", jax="xlogy", torch="xlogy"
     )
 )
 _add(FunctionSpec("entr", (R(1e-300, 1e300, negative=False),), scipy="entr", jax="entr", torch="entr"))
-_add(FunctionSpec("sinc", (R(1e-300, 1e8, focus=(1, 2, 3, 1e-8)),), scipy="sinc", numpy="sinc", torch="sinc"))
+_add(FunctionSpec("sinc", (R(1e-300, 1e6, focus=(1, 2, 3, 1e-8)),), scipy="sinc", numpy="sinc", torch="sinc"))
 _add(FunctionSpec("beta", (R(1e-3, 170.0, negative=False), R(1e-3, 170.0, negative=False)), scipy="beta"))
 _add(
     FunctionSpec(

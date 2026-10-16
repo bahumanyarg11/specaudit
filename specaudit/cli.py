@@ -33,6 +33,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("-o", "--out", default="results")
     p.add_argument("-q", "--quiet", action="store_true")
+    p.add_argument("--resume", action="store_true", help="skip functions already present in <out>/results.json")
 
     r = sub.add_parser("report", help="write the Markdown atlas")
     r.add_argument("results")
@@ -63,7 +64,16 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     libraries = args.libraries.split(",") if args.libraries else None
     dtypes = (np.float32,) if args.only_float32 else ((np.float64, np.float32) if args.float32 else (np.float64,))
-    run_audit(functions, libraries, dtypes, n=args.n, seed=args.seed, out_dir=args.out, verbose=not args.quiet)
+    run_audit(
+        functions,
+        libraries,
+        dtypes,
+        n=args.n,
+        seed=args.seed,
+        out_dir=args.out,
+        verbose=not args.quiet,
+        resume=args.resume,
+    )
     print(f"wrote {args.out}/results.json", file=sys.stderr)
     return 0
 

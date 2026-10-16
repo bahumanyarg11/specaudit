@@ -14,7 +14,7 @@ from ._version import __version__
 from .functions import FUNCTIONS, FunctionSpec, sample_domain
 from .libs import LIBRARIES, Library, adapter, load_library
 from .metrics import classify, summarise, ulp_error
-from .references import reference
+from .references import TIMEOUTS, reference
 
 WORST_KEEP = 25
 
@@ -75,13 +75,21 @@ def run_audit(
     seed: int = 0,
     out_dir: str | Path | None = None,
     verbose: bool = True,
+    resume: bool = False,
 ) -> dict:
     functions = functions or list(FUNCTIONS)
     libraries = libraries or list(LIBRARIES)
     libs = {name: load_library(name) for name in libraries}
     rng = np.random.default_rng(seed)
     results: list[CaseResult] = []
+    done: set[str] = set()
+    if resume and out_dir is not None and (Path(out_dir) / "results.json").exists():
+        prev = json.loads((Path(out_dir) / "results.json").read_text())
+        results = [CaseResult(**r) for r in prev["results"]]
+        done = {r.function for r in results}
     for fname in functions:
+        if fname in done:
+            continue
         spec = FUNCTIONS[fname]
         args = [sample_domain(d, n, rng) for d in spec.domains]
         t0 = time.perf_counter()
@@ -106,6 +114,24 @@ def run_audit(
                         + f"  ({res.seconds * 1e3:.0f} ms; ref {tref:.1f} s)"
                     )
                     print(line, flush=True)
+        if out_dir is not None:  # save after every function so a crash loses nothing
+            _save(out_dir, _meta(libs, n, seed, dtypes), results)
+    meta = _meta(libs, n, seed, dtypes)
+    payload = {"meta": meta, "results": [asdict(r) for r in results]}
+    if out_dir is not None:
+        _save(out_dir, meta, results)
+    return payload
+
+
+def _save(out_dir, meta, results) -> None:
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    tmp = out_dir / "results.json.tmp"
+    tmp.write_text(json.dumps({"meta": meta, "results": [asdict(r) for r in results]}, indent=1))
+    tmp.replace(out_dir / "results.json")
+
+
+def _meta(libs, n, seed, dtypes) -> dict:
     meta = {
         "specaudit": __version__,
         "python": platform.python_version(),
@@ -114,10 +140,6 @@ def run_audit(
         "seed": seed,
         "libraries": {k: {"version": v.version, "available": v.available, "reason": v.reason} for k, v in libs.items()},
         "dtypes": [np.dtype(d).name for d in dtypes],
+        "reference_timeouts": [{"function": f, "args": list(a)} for f, a in TIMEOUTS],
     }
-    payload = {"meta": meta, "results": [asdict(r) for r in results]}
-    if out_dir is not None:
-        out_dir = Path(out_dir)
-        out_dir.mkdir(parents=True, exist_ok=True)
-        (out_dir / "results.json").write_text(json.dumps(payload, indent=1))
-    return payload
+    return meta
