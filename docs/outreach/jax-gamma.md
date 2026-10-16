@@ -8,10 +8,10 @@ by roughly |ln Γ(x)| / ln 2 ULP: ~100 ULP at x = 20, ~1 400 ULP near x = 170. S
 direct Stirling/rational evaluation) stays within 3 ULP over the same inputs.
 
 ```python
-import jax, jax.numpy as jnp, mpmath, scipy.special
+import jax, jax.numpy as jnp, mpmath, numpy as np, scipy.special
 jax.config.update("jax_enable_x64", True)
 mpmath.mp.dps = 50
-def ulp(got, ref): return abs(got - ref) / (abs(ref) * 2.0**-52)
+def ulp(got, ref): return abs(got - ref) / np.spacing(abs(ref))  # ULP of the reference
 
 for x in [5.0, 10.0, 20.0, 50.25, 170.0, 171.6000020007015, -50.21846812810949]:
     ref = float(mpmath.gamma(mpmath.mpf(x)))
@@ -20,13 +20,13 @@ for x in [5.0, 10.0, 20.0, 50.25, 170.0, 171.6000020007015, -50.21846812810949]:
 ```
 
 ```
-x=5.0                  jax=24.000000000000004        ref=24.0                       jax       4 ULP   scipy    0 ULP
-x=10.0                 jax=362880.00000000006        ref=362880.0                   jax      18 ULP   scipy    0 ULP
-x=20.0                 jax=1.2164510040883034e+17    ref=1.21645100408832e+17       jax     104 ULP   scipy    0 ULP
-x=50.25                jax=1.614476471241216e+63     ref=1.6144764712412441e+63     jax     154 ULP   scipy    1 ULP
-x=170.0                jax=...                       ref=...                        jax    1364 ULP   scipy    2 ULP
-x=171.6000020007015    jax=1.585913225626989e+308    ref=1.5859132256275007e+308    jax    2564 ULP   scipy    1 ULP
-x=-50.21846812810949   jax=-6.916145190916293e-65    ref=-6.916145190915793e-65     jax     593 ULP   scipy    2 ULP
+x=5.0                  jax=24.000000000000014         ref=24.0                       jax       4 ULP   scipy    0 ULP
+x=10.0                 jax=362880.00000000105         ref=362880.0                   jax      18 ULP   scipy    0 ULP
+x=20.0                 jax=1.2164510040883034e+17     ref=1.21645100408832e+17       jax     104 ULP   scipy    0 ULP
+x=50.25                jax=1.614476471241216e+63      ref=1.6144764712412441e+63     jax     154 ULP   scipy    1 ULP
+x=170.0                jax=4.2690680090040405e+304    ref=4.269068009004705e+304     jax    1364 ULP   scipy    2 ULP
+x=171.6000020007015    jax=1.585913225626989e+308     ref=1.5859132256275007e+308    jax    2564 ULP   scipy    1 ULP
+x=-50.21846812810949   jax=-6.916145190916293e-65     ref=-6.916145190915793e-65     jax     593 ULP   scipy    2 ULP
 ```
 
 `Γ(5) = 24`, `Γ(10) = 362880` and `Γ(20) = 19!` are exactly representable in float64 and SciPy returns

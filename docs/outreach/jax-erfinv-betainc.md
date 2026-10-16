@@ -10,10 +10,10 @@ at 50 digits, SciPy 1.18.1 for comparison. jax 0.11.2 CPU, Python 3.13.7, macOS 
 recovers for 1 − x < 1e-14. SciPy's `erfinv` (Boost) stays ≤ 2 ULP throughout.
 
 ```python
-import jax, jax.numpy as jnp, mpmath, scipy.special
+import jax, jax.numpy as jnp, mpmath, numpy as np, scipy.special
 jax.config.update("jax_enable_x64", True)
 mpmath.mp.dps = 60
-def ulp(got, ref): return abs(got - ref) / (abs(ref) * 2.0**-52)
+def ulp(got, ref): return abs(got - ref) / np.spacing(abs(ref))  # ULP of the reference
 for k in [20, 24, 26, 28, 30, 32, 36, 40]:
     x = 1 - 2.0**-k
     ref = float(mpmath.erfinv(mpmath.mpf(x)))
@@ -22,14 +22,14 @@ for k in [20, 24, 26, 28, 30, 32, 36, 40]:
 ```
 
 ```
-x = 1 - 2^-20  jax=3.4655050258033313     ref=3.4655050258033307          1 ULP   scipy 1 ULP
-x = 1 - 2^-24  jax=3.8325068569007105     ref=3.832506856900711           1 ULP   scipy 0 ULP
-x = 1 - 2^-26  jax=4.004131885114474      ref=4.0041318851144753          1 ULP   scipy 0 ULP
-x = 1 - 2^-28  jax=4.169067086684586      ref=4.169067086901626      244000 ULP   scipy 0 ULP
-x = 1 - 2^-30  jax=4.328028275748485      ref=4.3280282758009465      59100 ULP   scipy 0 ULP
-x = 1 - 2^-32  jax=4.481612907106148      ref=4.4816129071188483      14300 ULP   scipy 0 ULP
-x = 1 - 2^-36  jax=4.77459742365601       ref=4.7745974236567506        840 ULP   scipy 0 ULP
-x = 1 - 2^-40  jax=5.051254085249347      ref=5.05125408524939           48 ULP   scipy 0 ULP
+x = 1 - 2^-20  jax=3.4655050258033313     ref=3.465505025803331             1 ULP   scipy 1 ULP
+x = 1 - 2^-24  jax=3.8325068569007104     ref=3.832506856900711             1 ULP   scipy 0 ULP
+x = 1 - 2^-26  jax=4.004131885114474      ref=4.004131885114475             1 ULP   scipy 0 ULP
+x = 1 - 2^-28  jax=4.1690670866841755     ref=4.1690670869016255       244827 ULP   scipy 0 ULP
+x = 1 - 2^-30  jax=4.328028275748485      ref=4.328028275800946         59066 ULP   scipy 0 ULP
+x = 1 - 2^-32  jax=4.481612907106162      ref=4.481612907118849         14284 ULP   scipy 0 ULP
+x = 1 - 2^-36  jax=4.774597423656005      ref=4.7745974236567505          839 ULP   scipy 0 ULP
+x = 1 - 2^-40  jax=5.051254085249347      ref=5.05125408524939             48 ULP   scipy 0 ULP
 ```
 
 On a 20 000-point grid of 1 − x log-spaced in [1e-16, 1e-2] the maximum error by decade is: [1e-10, 1e-8)
@@ -46,10 +46,10 @@ fine (≤ 6e-6 relative, same as PyTorch).
 SciPy's `betainc` (Boost `ibeta`) on the same 500 samples (a, b log-uniform in [0.01, 200], x in [0, 1]).
 
 ```python
-import jax, jax.numpy as jnp, mpmath, scipy.special
+import jax, jax.numpy as jnp, mpmath, numpy as np, scipy.special
 jax.config.update("jax_enable_x64", True)
 mpmath.mp.dps = 50
-def ulp(got, ref): return abs(got - ref) / (abs(ref) * 2.0**-52)
+def ulp(got, ref): return abs(got - ref) / np.spacing(abs(ref))  # ULP of the reference
 cases = [(170.14007970410853, 7.063291545468863, 0.381646572597626),
          (164.93605942738154, 0.027065444102122704, 0.6156738229997158),
          (5.071001278782578, 0.11186044140964943, 0.8874567825471773),
@@ -61,10 +61,10 @@ for a, b, x in cases:
 ```
 
 ```
-betainc(170.14, 7.06329, 0.381647) = 1.732454973012789e-62   ref 1.732454973013431e-62   jax   2970 ULP  scipy  122 ULP
-betainc(164.936, 0.0270654, 0.615674) = 8.66909529055828e-39  ref 8.66909529056035e-39    jax   1590 ULP  scipy   66 ULP
-betainc(5.071, 0.11186, 0.887457) = 0.059185706302427143      ref 0.05918570630242508     jax    297 ULP  scipy    1 ULP
-betainc(50, 60, 0.45) = 0.46423529143061076                   ref 0.4642352914306036      jax    129 ULP  scipy   16 ULP
+betainc(170.14, 7.06329, 0.381647) = 1.732454973012789e-62  ref 1.732454973013431e-62  jax   2974 ULP  scipy  122 ULP
+betainc(164.936, 0.0270654, 0.615674) = 8.66909529055828e-39  ref 8.66909529056035e-39  jax   1586 ULP  scipy   66 ULP
+betainc(5.071, 0.11186, 0.887457) = 0.059185706302427143  ref 0.05918570630242508  jax    297 ULP  scipy    1 ULP
+betainc(50, 60, 0.45) = 0.46423529143061076  ref 0.4642352914306036  jax    129 ULP  scipy   16 ULP
 ```
 
 The result also depends on what else is in the array: `betainc(0.6729797933675461, 0.01446774277865901,

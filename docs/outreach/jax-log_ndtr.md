@@ -24,11 +24,11 @@ for x in [5.0, 6.0, 7.0, 7.9, 7.98]:
 ```
 
 ```
-x=5.0:  log_ndtr=-2.866516130081049e-07   reference=-2.866516129637636e-07   rel err 1.5e-10  log1p(-ndtr(-x)) rel err 1.1e-15
-x=6.0:  log_ndtr=-9.865877009111571e-10   reference=-9.865876455243757e-10   rel err 5.6e-08  log1p(-ndtr(-x)) rel err 2.0e-15
-x=7.0:  log_ndtr=-1.2798651027886996e-12  reference=-1.279812543886654e-12   rel err 4.1e-05  log1p(-ndtr(-x)) rel err 1.1e-16
-x=7.9:  log_ndtr=-1.4432899320127045e-15  reference=-1.394517146659265e-15   rel err 3.5e-02  log1p(-ndtr(-x)) rel err 2.1e-15
-x=7.98: log_ndtr=-7.771561172376099e-16   reference=-7.316664535724895e-16   rel err 6.2e-02  log1p(-ndtr(-x)) rel err 5.3e-15
+x=5.0: log_ndtr=-2.866516130081049e-07  reference=-2.8665161296376358e-07  rel err 1.5e-10  log1p(-ndtr(-x)) rel err 1.7e-15
+x=6.0: log_ndtr=-9.8658770091115712e-10  reference=-9.865876455243758e-10  rel err 5.6e-08  log1p(-ndtr(-x)) rel err 4.0e-15
+x=7.0: log_ndtr=-1.2798651027886996e-12  reference=-1.2798125438866541e-12  rel err 4.1e-05  log1p(-ndtr(-x)) rel err 1.6e-16
+x=7.9: log_ndtr=-1.4432899320127045e-15  reference=-1.3945171466592653e-15  rel err 3.5e-02  log1p(-ndtr(-x)) rel err 2.7e-15
+x=7.98: log_ndtr=-7.7715611723760987e-16  reference=-7.316664535724895e-16  rel err 6.2e-02  log1p(-ndtr(-x)) rel err 6.5e-15
 ```
 
 On a 30 000-point grid over (5, 8] the maximum relative error is 7.7e-2 (at x ≈ 7.98); SciPy and

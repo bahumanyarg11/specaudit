@@ -14,17 +14,17 @@ def ref(a, b):  # lgamma form at a precision where a + b is exact
         return float(mpmath.loggamma(a) + mpmath.loggamma(b) - mpmath.loggamma(mpmath.mpf(a) + b))
 for a, b in [(1e100, 1e107), (1.0967934945056546e+142, 1.6614036713282665e+115), (2.383656518478368e+159, 7.822100164232287e+255),
              (2.2350235285263674e+123, 3.029877315654731e+117), (1.724473080349204e+106, 7.006411699535731e+100), (1e10, 1e20)]:
-    got, want = sp.betaln(a, b), ref(a, b)
+    got, want = float(sp.betaln(a, b)), ref(a, b)
     print(f"betaln({a:.6g}, {b:.6g}) = {got!r:26} reference {want!r:26} rel err {abs(got - want) / abs(want):.1e}")
 ```
 
 ```
-betaln(1e+100, 1e+107) = nan                        reference -1.7118095700958324e+101  rel err nan
-betaln(1.09679e+142, 1.6614e+115) = nan             reference -1.0426059922188929e+117  rel err nan
-betaln(2.38366e+159, 7.8221e+255) = nan             reference -5.321191058459192e+161   rel err nan
-betaln(2.23502e+123, 3.02988e+117) = -4.3967279428272305e+118  reference -4.396727951061843e+118   rel err 1.9e-09
-betaln(1.72447e+106, 7.00641e+100) = -9.398126308683334e+101   reference -9.39812631468069e+101    rel err 6.4e-10
-betaln(1e+10, 1e+20) = -240258509310.49857          reference -240258509310.49857       rel err 0.0e+00
+betaln(1e+100, 1e+107) = nan                        reference -1.711809570095832e+101    rel err nan
+betaln(1.09679e+142, 1.6614e+115) = nan                        reference -1.042605992218893e+117    rel err nan
+betaln(2.38366e+159, 7.8221e+255) = nan                        reference -5.321191058459192e+161    rel err nan
+betaln(2.23502e+123, 3.02988e+117) = -4.3967279428272305e+118   reference -4.396727951061843e+118    rel err 1.9e-09
+betaln(1.72447e+106, 7.00641e+100) = -9.398126308683334e+101    reference -9.39812631468069e+101     rel err 6.4e-10
+betaln(1e+10, 1e+20) = -240258509310.49857        reference -240258509310.49857        rel err 0.0e+00
 ```
 
 Grid (rows a, columns b/a = 1, 10, 1e3, 1e5, 1e6, 1e7, 1e10, 1e20, 1e50): every entry is finite for

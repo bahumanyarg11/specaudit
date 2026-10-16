@@ -13,7 +13,7 @@ Workspace on the Seagate drive (`/Volumes/Seagate Expansion Drive/TOPRESEARCH/sp
 2. [ ] float32 audit (torch/jax default dtype) → separate section
 3. [x] Cross-check every headline finding by hand (mpmath at 50 digits) on the stored worst inputs; issue drafts in docs/outreach/
 4. [ ] Heatmap PNGs over the domain for the ❌ cells (matplotlib)
-5. [x] README with headline numbers; CI; publish. [ ] Post the drafts in docs/outreach/ (user's account): jax log_ndtr, jax gamma, jax erfinv+betainc, pytorch erfinv (re-check on Linux first), scipy betaln, mpmath zeta; PyTorch Bessel/Airy (#198583) and ndtr (#192295) are already filed, JAX exp1 hang fixed (#41253)
+5. [x] README with headline numbers; CI; publish. [x] Posted 2026-10-16: jax#41676 (+PR jax#41679 log_ndtr), jax#41677 gamma, jax#41678 erfinv/betainc, scipy#26423 (+PR scipy/xsf#322), mpmath#1198, pytorch#201178 (erfinv, macOS-only: Linux x86_64 is exact), comment on pytorch#198583. Links in docs/outreach/README.md. Next: respond to reviews; the JAX PR needs the Google CLA signed by the user if not already.
 
 ## Log
 - 2026-10-16 chosen over an IBP reducer (months, no collaboration yield) as the next correctness-audit tool after chemout.
