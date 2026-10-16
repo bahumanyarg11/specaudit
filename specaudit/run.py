@@ -10,7 +10,7 @@ from pathlib import Path
 
 import numpy as np
 
-from . import __version__
+from ._version import __version__
 from .functions import FUNCTIONS, FunctionSpec, sample_domain
 from .libs import LIBRARIES, Library, adapter, load_library
 from .metrics import classify, summarise, ulp_error

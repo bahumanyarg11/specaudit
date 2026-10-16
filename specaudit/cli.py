@@ -12,7 +12,7 @@ import sys
 
 import numpy as np
 
-from . import __version__
+from ._version import __version__
 from .functions import FUNCTIONS
 from .libs import LIBRARIES
 
