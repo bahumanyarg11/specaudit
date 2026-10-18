@@ -36,7 +36,7 @@ PyTorch agree with each other to 2.5e-15 over the same grid. In float32 (the def
 thing happens for 2 < x ≤ 5: at `x = float32(4.974)` the relative error is 9.1e-2, and at x = 5.0 it is
 4.0e-2, where SciPy's float32 result is within 1e-9.
 
-Measured with `specaudit` (`pip install specaudit`): on 500 float64 samples `jax.scipy.special.log_ndtr`
+Measured with `ulpaudit` (`pip install ulpaudit`): on 500 float64 samples `jax.scipy.special.log_ndtr`
 has a 99th-percentile error of 9.2e5 ULP against ~700 ULP for SciPy and PyTorch (those 700 ULP are in
 the far tail x ≈ 30 and shared by all three).
 

@@ -1,7 +1,7 @@
-# specaudit build status
+# ulpaudit build status
 
 Resume: read this, `git log --oneline | head`, `PYTHONPATH=. .venv/bin/python -m pytest -q`, continue with the first unchecked item.
-Workspace on the Seagate drive (`/Volumes/Seagate Expansion Drive/TOPRESEARCH/specaudit`, symlinked from `09_PROJECTS/specaudit`); venv has numpy/scipy/mpmath/jax(cpu)/torch(cpu). No A6000. Commit as the user only, no AI attribution anywhere.
+Workspace on the Seagate drive (`/Volumes/Seagate Expansion Drive/TOPRESEARCH/ulpaudit`, symlinked from `09_PROJECTS/ulpaudit`); venv has numpy/scipy/mpmath/jax(cpu)/torch(cpu). No A6000. Commit as the user only, no AI attribution anywhere.
 
 ## Done
 - [x] mpmath double-double references for 40 functions (`references.py`), ULP metric + anomaly classes (`metrics.py`)

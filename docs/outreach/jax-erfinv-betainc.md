@@ -1,6 +1,6 @@
 # Two float64 accuracy gaps in jax.scipy.special: erfinv near ±1 (up to 5e5 ULP) and betainc (p99 ≈ 940 ULP, batch-dependent)
 
-Both found with `specaudit` (`pip install specaudit`), 500 float64 samples per function, reference mpmath
+Both found with `ulpaudit` (`pip install ulpaudit`), 500 float64 samples per function, reference mpmath
 at 50 digits, SciPy 1.18.1 for comparison. jax 0.11.2 CPU, Python 3.13.7, macOS 26.3.1 arm64.
 
 ## 1. erfinv for |x| → 1

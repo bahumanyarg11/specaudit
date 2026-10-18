@@ -1,7 +1,7 @@
 # Upstream outreach drafts
 
 Issue drafts for findings of the float64 atlas that were verified by hand against mpmath at 50
-digits on 2026-10-16 (`specaudit` 0.1.0, Python 3.13.7, macOS 26.3.1 arm64, SciPy 1.18.1,
+digits on 2026-10-16 (`ulpaudit` 0.1.0, Python 3.13.7, macOS 26.3.1 arm64, SciPy 1.18.1,
 NumPy 2.5.4, JAX 0.11.2, PyTorch 2.14.1 CPU). Posted on 2026-10-16 from the owner's account; links below.
 
 | draft | target | status |

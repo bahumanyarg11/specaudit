@@ -4,10 +4,10 @@ import numpy as np
 import pytest
 import scipy.special as sc
 
-from specaudit.functions import FUNCTIONS, sample_domain
-from specaudit.metrics import classify, summarise, ulp_error
-from specaudit.references import REFERENCES, reference
-from specaudit.testing import assert_max_ulp
+from ulpaudit.functions import FUNCTIONS, sample_domain
+from ulpaudit.metrics import classify, summarise, ulp_error
+from ulpaudit.references import REFERENCES, reference
+from ulpaudit.testing import assert_max_ulp
 
 
 def test_reference_values():
@@ -90,13 +90,13 @@ def test_assert_max_ulp_fails_for_a_bad_implementation():
 
 
 def test_small_audit_runs(tmp_path):
-    from specaudit.run import run_audit
+    from ulpaudit.run import run_audit
 
     payload = run_audit(["erf", "gammainc"], ["scipy", "numpy"], (np.float64,), n=60, out_dir=tmp_path, verbose=False)
     assert (tmp_path / "results.json").exists()
     names = {(r["function"], r["library"]) for r in payload["results"]}
     assert ("erf", "scipy") in names and ("gammainc", "scipy") in names
-    from specaudit.report import build_report
+    from ulpaudit.report import build_report
 
     text = build_report(tmp_path / "results.json", tmp_path / "ATLAS.md")
     assert "`erf`" in text

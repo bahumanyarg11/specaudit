@@ -1,6 +1,6 @@
-"""pytest plugin: a ``ulp`` fixture exposing :func:`specaudit.testing.assert_max_ulp`.
+"""pytest plugin: a ``ulp`` fixture exposing :func:`ulpaudit.testing.assert_max_ulp`.
 
-Enabled automatically through the ``pytest11`` entry point once specaudit is installed::
+Enabled automatically through the ``pytest11`` entry point once ulpaudit is installed::
 
     def test_my_erfinv(ulp):
         ulp.assert_max_ulp(my_erfinv, "erfinv", np.linspace(-0.99, 0.99, 999), max_ulp=2)

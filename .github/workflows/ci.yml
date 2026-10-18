@@ -19,7 +19,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - run: python -m pip install -e ".[dev]"
-      - run: ruff check specaudit tests
+      - run: ruff check ulpaudit tests
       - run: python -m pytest -q
       - name: Mini audit (SciPy only)
-        run: specaudit run -l scipy,numpy -f erf,gamma,gammainc -n 200 -o out && specaudit report out/results.json -o out/ATLAS.md
+        run: ulpaudit run -l scipy,numpy -f erf,gamma,gammainc -n 200 -o out && ulpaudit report out/results.json -o out/ATLAS.md

@@ -46,7 +46,7 @@ def build_report(results_path: str | Path, out_path: str | Path) -> str:
     lines = [
         "# Special-function accuracy atlas",
         "",
-        f"specaudit {meta['specaudit']} · {meta['n_per_function']} samples per function · seed {meta['seed']} · "
+        f"ulpaudit {meta['ulpaudit']} · {meta['n_per_function']} samples per function · seed {meta['seed']} · "
         f"Python {meta['python']} · {meta['platform']}",
         "",
         "Libraries: " + ", ".join(f"{k} {meta['libraries'][k]['version']}" for k in libs),

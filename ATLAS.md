@@ -1,6 +1,6 @@
 # Special-function accuracy atlas
 
-specaudit 0.1.0 · 500 samples per function · seed 0 · Python 3.13.7 · macOS-26.3.1-arm64-arm-64bit-Mach-O
+ulpaudit 0.1.0 · 500 samples per function · seed 0 · Python 3.13.7 · macOS-26.3.1-arm64-arm-64bit-Mach-O
 
 Libraries: scipy 1.18.1, numpy 2.5.4, jax 0.11.2, torch 2.14.1
 

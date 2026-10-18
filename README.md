@@ -1,30 +1,43 @@
-# specaudit
+# ulpaudit
+
+*Formerly `specaudit`. Renamed because that name is taken on PyPI by an unrelated package; old links redirect here.*
 
 **How accurate are the special functions you call?**
 
-specaudit evaluates `scipy.special`, `jax.scipy.special`, `torch.special` and NumPy against mpmath
+## Reported upstream
+
+ulpaudit's findings have led to these issues and fix PRs (all hand-verified against mpmath at 50 digits):
+
+| Library | Issue | Fix PR |
+|---|---|---|
+| PyTorch | [#201178](https://github.com/pytorch/pytorch/issues/201178) `erfinv` float64 on macOS arm64 | [#201324](https://github.com/pytorch/pytorch/pull/201324) Bessel `j0/j1/y0/y1`, `airy_ai` (Cephes denominators) |
+| JAX | [#41676](https://github.com/jax-ml/jax/issues/41676) `log_ndtr`, [#41677](https://github.com/jax-ml/jax/issues/41677) `gamma`, [#41678](https://github.com/jax-ml/jax/issues/41678) `erfinv`/`betainc` | [#41679](https://github.com/jax-ml/jax/pull/41679) `log_ndtr` |
+| SciPy | [#26423](https://github.com/scipy/scipy/issues/26423) `betaln` NaN for large arguments | [scipy/xsf#322](https://github.com/scipy/xsf/pull/322) |
+| mpmath | [#1198](https://github.com/mpmath/mpmath/issues/1198) Hurwitz `zeta` relative accuracy | [#1199](https://github.com/mpmath/mpmath/pull/1199) |
+
+ulpaudit evaluates `scipy.special`, `jax.scipy.special`, `torch.special` and NumPy against mpmath
 references carried to 30 significant digits (worst cases re-verified at 50) and reports the error in **units in the last place
 (ULP)**, per function, per library, per dtype, over wide parameter ranges including tails, poles and
 inverse-function end points. The result is an accuracy atlas you can read, and an assertion you can
 put in your own test suite.
 
 ```bash
-pip install specaudit          # numpy, scipy, mpmath; jax/torch optional
-specaudit list                 # 40 functions, which library provides which
-specaudit run -n 2000 -o results            # all libraries found, float64
-specaudit run --float32 -l torch,jax        # the dtype those libraries default to
-specaudit report results/results.json -o ATLAS.md
+pip install git+https://github.com/bahumanyarg11/ulpaudit   # numpy, scipy, mpmath; jax/torch optional (not on PyPI yet)
+ulpaudit list                 # 40 functions, which library provides which
+ulpaudit run -n 2000 -o results            # all libraries found, float64
+ulpaudit run --float32 -l torch,jax        # the dtype those libraries default to
+ulpaudit report results/results.json -o ATLAS.md
 ```
 
 ```python
-from specaudit import assert_max_ulp
+from ulpaudit import assert_max_ulp
 import torch, numpy as np
 
 # fails with the worst inputs listed if any sample is more than 4 ULP off, or returns NaN/inf wrongly
 assert_max_ulp(torch.special.erfinv, "erfinv", torch.linspace(-0.999, 0.999, 1001), max_ulp=4)
 ```
 
-With specaudit installed, pytest gets a `ulp` fixture exposing the same helper.
+With ulpaudit installed, pytest gets a `ulp` fixture exposing the same helper.
 
 ## What the atlas shows
 
@@ -112,7 +125,7 @@ function in `references.py` plus a `FunctionSpec` in `functions.py`.
 ## Install from source
 
 ```bash
-git clone https://github.com/bahumanyarg11/specaudit && cd specaudit
+git clone https://github.com/bahumanyarg11/ulpaudit && cd ulpaudit
 python -m venv .venv && . .venv/bin/activate
 pip install -e ".[dev,jax,torch]"
 pytest -q

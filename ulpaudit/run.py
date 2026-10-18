@@ -135,7 +135,7 @@ def _save(out_dir, meta, results) -> None:
 
 def _meta(libs, n, seed, dtypes) -> dict:
     meta = {
-        "specaudit": __version__,
+        "ulpaudit": __version__,
         "python": platform.python_version(),
         "platform": platform.platform(),
         "n_per_function": n,

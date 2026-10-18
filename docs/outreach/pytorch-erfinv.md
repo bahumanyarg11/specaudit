@@ -32,7 +32,7 @@ x = 1 - 2^-52  torch=5.805365688510647      ref=5.805018683193453      abs err +
 
 Maximum error by decade of 1 − x on a 20 000-point log grid: [1e-16, 1e-14) 3.6e-4 absolute, [1e-12, 1e-10)
 7.5e-6, [1e-10, 1e-8) 8.4e-8, [1e-8, 1e-7) 9.0e-10, [1e-7, 1e-6) 9.8e-11, [1e-5, 1e-4) 1.3e-12. On 500
-samples with dense coverage of ±0.999999 (`specaudit run -f erfinv`), 13 % are > 4 ULP off and the 99th
+samples with dense coverage of ±0.999999 (`ulpaudit run -f erfinv`), 13 % are > 4 ULP off and the 99th
 percentile is 2.1e4 ULP. Float32 is fine (≤ 6.8e-6 relative, like JAX).
 
 Likely cause: the macOS result is bit-identical to a Python re-implementation of `calc_erfinv`

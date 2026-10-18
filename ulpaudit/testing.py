@@ -1,10 +1,10 @@
 """Helpers for asserting accuracy in your own test suite.
 
-    from specaudit import assert_max_ulp
+    from ulpaudit import assert_max_ulp
     assert_max_ulp(torch.special.erfinv, "erfinv", torch.linspace(-0.999, 0.999, 1001), max_ulp=4)
 
 The callable may take/return NumPy arrays, JAX arrays or PyTorch tensors; the reference is looked
-up by name in :mod:`specaudit.references`.
+up by name in :mod:`ulpaudit.references`.
 """
 
 from __future__ import annotations

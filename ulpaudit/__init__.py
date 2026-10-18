@@ -1,4 +1,4 @@
-"""specaudit: how accurate are the special functions you call?
+"""ulpaudit: how accurate are the special functions you call?
 
 Evaluates SciPy, JAX and PyTorch implementations against mpmath references at 30 significant
 digits and reports the error in units in the last place (ULP), per function, per library, per

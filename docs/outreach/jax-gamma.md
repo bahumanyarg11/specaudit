@@ -31,7 +31,7 @@ x=-50.21846812810949   jax=-6.916145190916293e-65     ref=-6.916145190915793e-65
 
 `Γ(5) = 24`, `Γ(10) = 362880` and `Γ(20) = 19!` are exactly representable in float64 and SciPy returns
 them exactly; JAX returns the neighbours. On 500 log-uniform float64 samples over (1e-300, 180) plus
-dense neighbourhoods of the poles and of 171.6 (`specaudit run -f gamma`), 84 % of JAX's results are
+dense neighbourhoods of the poles and of 171.6 (`ulpaudit run -f gamma`), 84 % of JAX's results are
 more than 4 ULP off and the 99th percentile is 1 366 ULP; SciPy's 99th percentile is 2.5 ULP.
 
 ### Expected behaviour

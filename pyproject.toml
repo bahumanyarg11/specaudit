@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "specaudit"
+name = "ulpaudit"
 version = "0.1.0"
 description = "Accuracy audit of special functions in SciPy, JAX and PyTorch against arbitrary-precision references"
 readme = "README.md"
@@ -27,13 +27,13 @@ plot = ["matplotlib>=3.7"]
 dev = ["pytest>=7", "ruff>=0.4", "matplotlib>=3.7"]
 
 [project.scripts]
-specaudit = "specaudit.cli:main"
+ulpaudit = "ulpaudit.cli:main"
 
 [project.entry-points.pytest11]
-specaudit = "specaudit.pytest_plugin"
+ulpaudit = "ulpaudit.pytest_plugin"
 
 [tool.setuptools.packages.find]
-include = ["specaudit*"]
+include = ["ulpaudit*"]
 
 [tool.ruff]
 line-length = 120

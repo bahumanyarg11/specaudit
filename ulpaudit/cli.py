@@ -1,8 +1,8 @@
-"""specaudit CLI.
+"""ulpaudit CLI.
 
-specaudit run [-f gamma,erf,...] [-l scipy,jax,torch] [--float32] [-n 2000] [-o results/]
-specaudit report results/results.json -o ATLAS.md
-specaudit list
+ulpaudit run [-f gamma,erf,...] [-l scipy,jax,torch] [--float32] [-n 2000] [-o results/]
+ulpaudit report results/results.json -o ATLAS.md
+ulpaudit list
 """
 
 from __future__ import annotations
@@ -19,9 +19,9 @@ from .libs import LIBRARIES
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(
-        prog="specaudit", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+        prog="ulpaudit", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
-    ap.add_argument("--version", action="version", version=f"specaudit {__version__}")
+    ap.add_argument("--version", action="version", version=f"ulpaudit {__version__}")
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     p = sub.add_parser("run", help="evaluate libraries against the references")
